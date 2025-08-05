@@ -17,7 +17,7 @@ class ListUserResponses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Tidak ada action create karena data hanya dari API
+            
         ];
     }
 

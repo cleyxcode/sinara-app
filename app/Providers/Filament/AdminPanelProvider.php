@@ -37,6 +37,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
+                 \App\Filament\Widgets\UserResponseStatsWidget::class,
+                \App\Filament\Widgets\UserAppStatsWidget::class,
+                \App\Filament\Widgets\ScreeningTrendChartWidget::class,
+                  \App\Filament\Widgets\RiskDistributionChartWidget::class,
                
             ])
             ->middleware([

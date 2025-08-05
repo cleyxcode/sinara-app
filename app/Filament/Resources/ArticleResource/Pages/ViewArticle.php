@@ -1,6 +1,6 @@
 <?php
 
-// app/Filament/Resources/ArticleResource/Pages/ViewArticle.php
+
 
 namespace App\Filament\Resources\ArticleResource\Pages;
 

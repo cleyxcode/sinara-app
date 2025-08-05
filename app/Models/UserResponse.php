@@ -43,7 +43,7 @@ class UserResponse extends Model
 
     public static function determineRiskLevel($responses)
     {
-        // Kotak merah adalah jawaban berisiko (score 1)
+        
         $hasRiskyAnswer = collect($responses)->contains(function ($response) {
             return $response['score'] == 1;
         });
@@ -55,7 +55,7 @@ class UserResponse extends Model
     {
         $recommendations = [];
 
-        // Rekomendasi umum untuk semua tingkat risiko
+       
         $recommendations[] = 'Lakukan deteksi dini kanker serviks melalui IVA di Puskesmas atau Pap Smear di Fasilitas Kesehatan lainnya untuk hasil yang lebih akurat.';
 
         if ($riskLevel === 'Rendah') {
