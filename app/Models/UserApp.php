@@ -30,6 +30,7 @@ class UserApp extends Authenticatable
         'alamat',
         'umur',
         'phone',
+        'fasilitas_kesehatan',
     ];
 
     /**

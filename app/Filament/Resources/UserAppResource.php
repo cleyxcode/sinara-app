@@ -10,7 +10,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
-
+use Filament\Tables\Columns\TextColumn;
 class UserAppResource extends Resource
 {
     protected static ?string $model = UserApp::class;
@@ -41,7 +41,35 @@ class UserAppResource extends Resource
                     ->searchable(),
                 
                 Tables\Columns\TextColumn::make('alamat')
-                    ->label('wilayah'),
+                    ->label('Wilayah')
+                    ->limit(30)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 30) {
+                            return null;
+                        }
+                        return $state;
+                    }),
+                
+                Tables\Columns\TextColumn::make('fasilitas_kesehatan')
+                    ->label('Fasilitas Kesehatan')
+                    ->searchable()
+                    ->badge()
+                    ->color('info')
+                    ->limit(25)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 25) {
+                            return null;
+                        }
+                        return $state;
+                    }),
+                    
+                Tables\Columns\TextColumn::make('umur')
+                    ->label('Umur')
+                    ->suffix(' thn')
+                    ->alignCenter()
+                    ->sortable(),
                     
             ])
             ->actions([
@@ -87,6 +115,14 @@ class UserAppResource extends Resource
                             ->label('Alamat Lengkap')
                             ->columnSpanFull()
                             ->icon('heroicon-m-map-pin'),
+                            
+                        Infolists\Components\TextEntry::make('fasilitas_kesehatan')
+                            ->label('Fasilitas Kesehatan')
+                            ->columnSpanFull()
+                            ->badge()
+                            ->size('lg')
+                            ->color('success')
+                            ->icon('heroicon-m-building-office-2'),
                     ]),
                 
                 Infolists\Components\Section::make('Status & Informasi Akun')
@@ -138,7 +174,7 @@ class UserAppResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'email', 'phone'];
+        return ['name', 'email', 'phone', 'fasilitas_kesehatan'];
     }
 
     // Disable create dan edit karena data dari API
@@ -161,6 +197,4 @@ class UserAppResource extends Resource
     {
         return false;
     }
-
-    
 }

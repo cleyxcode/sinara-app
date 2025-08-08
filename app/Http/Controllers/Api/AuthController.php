@@ -21,12 +21,13 @@ class AuthController extends Controller
             'alamat' => 'required|string|max:255',
             'umur' => 'required|integer|min:1|max:120',
             'phone' => 'required|string|max:20',
+            'fasilitas_kesehatan' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
+                'message' => 'Kesalahan validasi',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -39,13 +40,14 @@ class AuthController extends Controller
                 'alamat' => $request->alamat,
                 'umur' => $request->umur,
                 'phone' => $request->phone,
+                'fasilitas_kesehatan' => $request->fasilitas_kesehatan,
             ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
                 'success' => true,
-                'message' => 'User registered successfully',
+                'message' => 'Pengguna berhasil didaftarkan',
                 'data' => [
                     'user' => [
                         'id' => $user->id,
@@ -54,6 +56,7 @@ class AuthController extends Controller
                         'alamat' => $user->alamat,
                         'umur' => $user->umur,
                         'phone' => $user->phone,
+                        'fasilitas_kesehatan' => $user->fasilitas_kesehatan,
                     ],
                     'token' => $token,
                     'token_type' => 'Bearer'
@@ -63,7 +66,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed',
+                'message' => 'Pendaftaran gagal',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -79,7 +82,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
+                'message' => 'Kesalahan validasi',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -89,7 +92,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials'
+                'message' => 'Email atau password salah'
             ], 401);
         }
 
@@ -97,7 +100,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Login successful',
+            'message' => 'Login berhasil',
             'data' => [
                 'user' => [
                     'id' => $user->id,
@@ -106,6 +109,7 @@ class AuthController extends Controller
                     'alamat' => $user->alamat,
                     'umur' => $user->umur,
                     'phone' => $user->phone,
+                    'fasilitas_kesehatan' => $user->fasilitas_kesehatan,
                 ],
                 'token' => $token,
                 'token_type' => 'Bearer'
@@ -120,13 +124,13 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Logout successful'
+                'message' => 'Logout berhasil'
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Logout failed',
+                'message' => 'Logout gagal',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -138,7 +142,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Profile retrieved successfully',
+            'message' => 'Profil berhasil diambil',
             'data' => [
                 'user' => [
                     'id' => $user->id,
@@ -147,6 +151,7 @@ class AuthController extends Controller
                     'alamat' => $user->alamat,
                     'umur' => $user->umur,
                     'phone' => $user->phone,
+                    'fasilitas_kesehatan' => $user->fasilitas_kesehatan,
                 ]
             ]
         ], 200);
@@ -166,24 +171,25 @@ class AuthController extends Controller
             'alamat' => 'sometimes|string|max:255',
             'umur' => 'sometimes|integer|min:1|max:120',
             'phone' => 'sometimes|string|max:20',
+            'fasilitas_kesehatan' => 'sometimes|string|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
+                'message' => 'Kesalahan validasi',
                 'errors' => $validator->errors()
             ], 422);
         }
 
         try {
-            $updateData = array_filter($request->only(['name', 'email', 'alamat', 'umur', 'phone']));
+            $updateData = array_filter($request->only(['name', 'email', 'alamat', 'umur', 'phone', 'fasilitas_kesehatan']));
             
             $user->update($updateData);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Profile updated successfully',
+                'message' => 'Profil berhasil diperbarui',
                 'data' => [
                     'user' => [
                         'id' => $user->id,
@@ -192,6 +198,7 @@ class AuthController extends Controller
                         'alamat' => $user->alamat,
                         'umur' => $user->umur,
                         'phone' => $user->phone,
+                        'fasilitas_kesehatan' => $user->fasilitas_kesehatan,
                     ]
                 ]
             ], 200);
@@ -199,7 +206,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Profile update failed',
+                'message' => 'Pembaruan profil gagal',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -216,7 +223,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
+                'message' => 'Kesalahan validasi',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -226,14 +233,14 @@ class AuthController extends Controller
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Current password is incorrect'
+                'message' => 'Password saat ini salah'
             ], 400);
         }
 
         if (Hash::check($request->new_password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'New password must be different from current password'
+                'message' => 'Password baru harus berbeda dari password saat ini'
             ], 400);
         }
 
@@ -244,13 +251,13 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Password updated successfully'
+                'message' => 'Password berhasil diperbarui'
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Password update failed',
+                'message' => 'Pembaruan password gagal',
                 'error' => $e->getMessage()
             ], 500);
         }
