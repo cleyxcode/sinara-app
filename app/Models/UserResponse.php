@@ -41,6 +41,36 @@ class UserResponse extends Model
         return $query->whereBetween('completed_at', [$startDate, $endDate]);
     }
 
+    /**
+     * Scope untuk filter berdasarkan fasilitas kesehatan
+     */
+    public function scopeByFacility($query, $facility)
+    {
+        return $query->whereHas('user', function ($q) use ($facility) {
+            $q->where('fasilitas_kesehatan', $facility);
+        });
+    }
+
+    /**
+     * Get formatted completion date
+     */
+    public function getFormattedCompletedAtAttribute()
+    {
+        return $this->completed_at ? $this->completed_at->format('d/m/Y H:i') : null;
+    }
+
+    /**
+     * Get risk level badge color
+     */
+    public function getRiskLevelColorAttribute()
+    {
+        return match($this->risk_level) {
+            'Rendah' => 'success',
+            'Sedang-Tinggi' => 'warning',
+            default => 'gray'
+        };
+    }
+
     public static function determineRiskLevel($responses)
     {
         

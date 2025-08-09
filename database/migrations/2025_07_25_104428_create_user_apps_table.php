@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('alamat');
             $table->integer('umur');
             $table->string('phone');
+             $table->string('fasilitas_kesehatan');
             $table->rememberToken();
             $table->timestamps();
         });

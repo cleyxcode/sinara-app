@@ -82,6 +82,20 @@ class UserResponseResource extends Resource
                     })
                     ->wrap(),
 
+                TextColumn::make('user.fasilitas_kesehatan')
+                    ->label('Fasilitas Kesehatan')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(25)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 25) {
+                            return null;
+                        }
+                        return $state;
+                    })
+                    ->wrap(),
+
                 TextColumn::make('user.umur')
                     ->label('Umur')
                     ->suffix(' tahun')
@@ -92,9 +106,8 @@ class UserResponseResource extends Resource
                     ->label('Skor Total')
                     ->badge()
                     ->color(fn (string $state): string => match (true) {
-                        $state <= 7 => 'success',
-                        $state <= 14 => 'warning',
-                        default => 'danger',
+                        $state == 0 => 'success',
+                        default => 'warning',
                     })
                     ->sortable(),
 
@@ -103,8 +116,7 @@ class UserResponseResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Rendah' => 'success',
-                        'Sedang' => 'warning',
-                        'Tinggi' => 'danger',
+                        'Sedang-Tinggi' => 'warning',
                         default => 'gray',
                     })
                     ->sortable(),
@@ -134,10 +146,20 @@ class UserResponseResource extends Resource
                     ->label('Tingkat Risiko')
                     ->options([
                         'Rendah' => 'Rendah',
-                        'Sedang' => 'Sedang',
-                        'Tinggi' => 'Tinggi',
+                        'Sedang-Tinggi' => 'Sedang-Tinggi',
                     ])
                     ->placeholder('Semua Tingkat Risiko'),
+
+                SelectFilter::make('fasilitas_kesehatan')
+                    ->label('Fasilitas Kesehatan')
+                    ->options(function () {
+                        return \App\Models\UserApp::distinct()
+                            ->pluck('fasilitas_kesehatan', 'fasilitas_kesehatan')
+                            ->filter()
+                            ->toArray();
+                    })
+                    ->placeholder('Semua Fasilitas Kesehatan')
+                    ->searchable(),
 
                 Filter::make('score_range')
                     ->form([
@@ -231,6 +253,7 @@ class UserResponseResource extends Resource
                                     Column::make('user.email')->heading('Email'),
                                     Column::make('user.phone')->heading('No. Telepon'),
                                     Column::make('user.alamat')->heading('Alamat'),
+                                    Column::make('user.fasilitas_kesehatan')->heading('Fasilitas Kesehatan'),
                                     Column::make('user.umur')
                                         ->heading('Umur')
                                         ->formatStateUsing(fn ($state) => $state . ' tahun'),
@@ -251,6 +274,7 @@ class UserResponseResource extends Resource
                                     Column::make('user.email')->heading('Email'),
                                     Column::make('user.phone')->heading('No. Telepon'),
                                     Column::make('user.alamat')->heading('Alamat'),
+                                    Column::make('user.fasilitas_kesehatan')->heading('Fasilitas Kesehatan'),
                                     Column::make('user.umur')
                                         ->heading('Umur')
                                         ->formatStateUsing(fn ($state) => $state . ' tahun'),
@@ -284,6 +308,7 @@ class UserResponseResource extends Resource
                                 ->withWriterType(Excel::CSV)
                                 ->withColumns([
                                     Column::make('id')->heading('ID'),
+                                    Column::make('user.fasilitas_kesehatan')->heading('Fasilitas_Kesehatan'),
                                     Column::make('user.umur')->heading('Umur'),
                                     Column::make('total_score')->heading('Skor_Total'),
                                     Column::make('risk_level')->heading('Tingkat_Risiko'),
@@ -319,6 +344,7 @@ class UserResponseResource extends Resource
                                 Column::make('user.name')->heading('Nama User'),
                                 Column::make('user.email')->heading('Email'),
                                 Column::make('user.phone')->heading('No. Telepon'),
+                                Column::make('user.fasilitas_kesehatan')->heading('Fasilitas Kesehatan'),
                                 Column::make('user.umur')
                                     ->heading('Umur')
                                     ->formatStateUsing(fn ($state) => $state . ' tahun'),
@@ -338,6 +364,7 @@ class UserResponseResource extends Resource
                                 Column::make('user.email')->heading('Email'),
                                 Column::make('user.phone')->heading('No. Telepon'),
                                 Column::make('user.alamat')->heading('Alamat'),
+                                Column::make('user.fasilitas_kesehatan')->heading('Fasilitas Kesehatan'),
                                 Column::make('user.umur')
                                     ->heading('Umur')
                                     ->formatStateUsing(fn ($state) => $state . ' tahun'),
@@ -398,6 +425,35 @@ class UserResponseResource extends Resource
                                 Column::make('min_score')->heading('Skor Terendah'),
                                 Column::make('max_score')->heading('Skor Tertinggi'),
                                 Column::make('low_risk')->heading('Risiko Rendah'),
+                                Column::make('medium_high_risk')->heading('Risiko Sedang-Tinggi'),
+                            ]),
+
+                        // Export berdasarkan Fasilitas Kesehatan
+                        ExcelExport::make('by_facility')
+                            ->withFilename(fn () => 'laporan-per-faskes-' . now()->format('Y-m-d-H-i'))
+                            ->modifyQueryUsing(function ($query) {
+                                return $query->join('user_apps', 'user_responses.user_id', '=', 'user_apps.id')
+                                    ->selectRaw('
+                                        user_apps.fasilitas_kesehatan,
+                                        COUNT(*) as total_responses,
+                                        AVG(user_responses.total_score) as avg_score,
+                                        SUM(CASE WHEN user_responses.risk_level = "Rendah" THEN 1 ELSE 0 END) as low_risk,
+                                        SUM(CASE WHEN user_responses.risk_level = "Sedang-Tinggi" THEN 1 ELSE 0 END) as medium_high_risk,
+                                        MIN(user_responses.total_score) as min_score,
+                                        MAX(user_responses.total_score) as max_score
+                                    ')
+                                    ->groupBy('user_apps.fasilitas_kesehatan')
+                                    ->orderBy('user_apps.fasilitas_kesehatan');
+                            })
+                            ->withColumns([
+                                Column::make('fasilitas_kesehatan')->heading('Fasilitas Kesehatan'),
+                                Column::make('total_responses')->heading('Total Responden'),
+                                Column::make('avg_score')
+                                    ->heading('Rata-rata Skor')
+                                    ->formatStateUsing(fn ($state) => number_format($state, 2)),
+                                Column::make('min_score')->heading('Skor Terendah'),
+                                Column::make('max_score')->heading('Skor Tertinggi'),
+                                Column::make('low_risk')->heading('Risiko Rendah'),
                                 Column::make('medium_risk')->heading('Risiko Sedang'),
                                 Column::make('high_risk')->heading('Risiko Tinggi'),
                             ]),
@@ -429,6 +485,10 @@ class UserResponseResource extends Resource
                             ->copyable()
                             ->copyMessage('Nomor telepon disalin!')
                             ->copyMessageDuration(1500),
+                        TextEntry::make('user.fasilitas_kesehatan')
+                            ->label('Fasilitas Kesehatan')
+                            ->badge()
+                            ->color('info'),
                         TextEntry::make('user.alamat')
                             ->label('Alamat')
                             ->columnSpanFull(),
@@ -448,9 +508,8 @@ class UserResponseResource extends Resource
                             ->label('Skor Total')
                             ->badge()
                             ->color(fn (string $state): string => match (true) {
-                                $state <= 7 => 'success',
-                                $state <= 14 => 'warning',
-                                default => 'danger',
+                                $state == 0 => 'success',
+                                default => 'warning',
                             })
                             ->size(TextEntry\TextEntrySize::Large),
                         TextEntry::make('risk_level')
@@ -458,8 +517,7 @@ class UserResponseResource extends Resource
                             ->badge()
                             ->color(fn (string $state): string => match ($state) {
                                 'Rendah' => 'success',
-                                'Sedang' => 'warning',
-                                'Tinggi' => 'danger',
+                                'Sedang-Tinggi' => 'warning',
                                 default => 'gray',
                             })
                             ->size(TextEntry\TextEntrySize::Large),

@@ -120,7 +120,8 @@ class ResponseApiController extends Controller
                         'email' => $user->email,
                         'phone' => $user->phone,
                         'alamat' => $user->alamat,
-                        'umur' => $user->umur
+                        'umur' => $user->umur,
+                        'fasilitas_kesehatan' => $user->fasilitas_kesehatan
                     ],
                     'test_result' => [
                         'total_questions' => count($validatedResponses),
@@ -169,7 +170,8 @@ class ResponseApiController extends Controller
                         'name' => $user->name,
                         'phone' => $user->phone,
                         'alamat' => $user->alamat,
-                        'umur' => $user->umur
+                        'umur' => $user->umur,
+                        'fasilitas_kesehatan' => $user->fasilitas_kesehatan
                     ],
                     'history' => $responses->items(),
                     'pagination' => [
@@ -225,7 +227,8 @@ class ResponseApiController extends Controller
                         'email' => $response->user->email,
                         'phone' => $response->user->phone,
                         'alamat' => $response->user->alamat,
-                        'umur' => $response->user->umur
+                        'umur' => $response->user->umur,
+                        'fasilitas_kesehatan' => $response->user->fasilitas_kesehatan
                     ],
                     'test_result' => [
                         'total_questions' => count($response->responses),
