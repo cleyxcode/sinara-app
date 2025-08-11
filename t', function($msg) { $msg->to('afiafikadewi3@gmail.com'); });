@@ -1,0 +1,63 @@
+[90m= [39m[
+    "[34mdefault[39m" => "[32msmtp[39m",
+    "[34mmailers[39m" => [
+      "[34msmtp[39m" => [
+        "[34mtransport[39m" => "[32msmtp[39m",
+        "[34mscheme[39m" => [36mnull[39m,
+        "[34murl[39m" => [36mnull[39m,
+        "[34mhost[39m" => "[32msmtp.gmail.com[39m",
+        "[34mport[39m" => "[32m587[39m",
+        "[34musername[39m" => "[32msinaraotp.com[39m",
+        "[34mpassword[39m" => "[32mqkebgzijlkkxzaoc[39m",
+        "[34mtimeout[39m" => [36mnull[39m,
+        "[34mlocal_domain[39m" => "[32mlocalhost[39m",
+      ],
+      "[34mses[39m" => [
+        "[34mtransport[39m" => "[32mses[39m",
+      ],
+      "[34mpostmark[39m" => [
+        "[34mtransport[39m" => "[32mpostmark[39m",
+      ],
+      "[34mresend[39m" => [
+        "[34mtransport[39m" => "[32mresend[39m",
+      ],
+      "[34msendmail[39m" => [
+        "[34mtransport[39m" => "[32msendmail[39m",
+        "[34mpath[39m" => "[32m/usr/sbin/sendmail -bs -i[39m",
+      ],
+      "[34mlog[39m" => [
+        "[34mtransport[39m" => "[32mlog[39m",
+        "[34mchannel[39m" => [36mnull[39m,
+      ],
+      "[34marray[39m" => [
+        "[34mtransport[39m" => "[32marray[39m",
+      ],
+      "[34mfailover[39m" => [
+        "[34mtransport[39m" => "[32mfailover[39m",
+        "[34mmailers[39m" => [
+          "[32msmtp[39m",
+          "[32mlog[39m",
+        ],
+        "[34mretry_after[39m" => [35m60[39m,
+      ],
+      "[34mroundrobin[39m" => [
+        "[34mtransport[39m" => "[32mroundrobin[39m",
+        "[34mmailers[39m" => [
+          "[32mses[39m",
+          "[32mpostmark[39m",
+        ],
+        "[34mretry_after[39m" => [35m60[39m,
+      ],
+    ],
+    "[34mfrom[39m" => [
+      "[34maddress[39m" => "[32mafiafikadewi3@gmail.com[39m",
+      "[34mname[39m" => "[32mSINARA - Kanker Serviks[39m",
+    ],
+    "[34mmarkdown[39m" => [
+      "[34mtheme[39m" => "[32mdefault[39m",
+      "[34mpaths[39m" => [
+        "[32m/home/xcode/project-laravel/sinara-app/resources/views/vendor/mail[39m",
+      ],
+    ],
+  ]
+

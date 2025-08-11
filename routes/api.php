@@ -10,6 +10,11 @@ use App\Http\Controllers\Api\ResponseApiController;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    
+    // Password Reset Routes
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/verify-reset-token', [AuthController::class, 'verifyResetToken']);
 });
 
 Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
