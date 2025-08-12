@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->font('Inter') 
             ->brandName('PETUGAS SINARA')
             ->colors([
                 'primary' => Color::Amber,
