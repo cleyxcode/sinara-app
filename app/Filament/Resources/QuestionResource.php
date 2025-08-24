@@ -42,7 +42,7 @@ class QuestionResource extends Resource
                     ->numeric()
                     ->required()
                     ->minValue(1)
-                    ->maxValue(21)
+                    ->maxValue(50)
                     ->helperText('Urutan pertanyaan 1-21'),
 
                 Textarea::make('question_text')

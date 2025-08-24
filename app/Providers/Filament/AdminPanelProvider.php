@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->globalSearch()
-            ->databaseNotifications()
+            
             ->font('Inter') 
             ->brandName('PETUGAS SINARA')
             ->colors([

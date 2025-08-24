@@ -30,7 +30,7 @@ class UserResponseResource extends Resource
 {
     protected static ?string $model = UserResponse::class;
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationLabel = 'Hasil Skrining';
+    protected static ?string $navigationLabel = 'Hasil Skrining aplikasi';
     protected static ?string $modelLabel = 'Hasil Skrining User';
     protected static ?string $pluralModelLabel = 'Hasil Skrining Users';
     protected static ?int $navigationSort = 2;
@@ -239,9 +239,32 @@ class UserResponseResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->label('Lihat Detail')
                     ->icon('heroicon-m-eye'),
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus')
+                    ->icon('heroicon-m-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus Data Skrining')
+                    ->modalDescription('Apakah Anda yakin ingin menghapus data skrining ini? Tindakan ini tidak dapat dibatalkan.')
+                    ->modalSubmitActionLabel('Ya, Hapus')
+                    ->modalCancelActionLabel('Batal')
+                    ->successNotificationTitle('Data berhasil dihapus')
+                   
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Hapus Terpilih')
+                        ->icon('heroicon-m-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Data Skrining Terpilih')
+                        ->modalDescription('Apakah Anda yakin ingin menghapus semua data skrining yang dipilih? Tindakan ini tidak dapat dibatalkan.')
+                        ->modalSubmitActionLabel('Ya, Hapus Semua')
+                        ->modalCancelActionLabel('Batal')
+                        ->successNotificationTitle('Data terpilih berhasil dihapus')
+                        ->deselectRecordsAfterCompletion(),
+                        
                     ExportBulkAction::make()
                         ->exports([
                             // Export Summary - Ringkasan data
@@ -592,7 +615,7 @@ class UserResponseResource extends Resource
 
     public static function canDelete($record): bool
     {
-        return false; 
+        return true; // Mengaktifkan fungsi delete
     }
 
     public static function getNavigationBadge(): ?string

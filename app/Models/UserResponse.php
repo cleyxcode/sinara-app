@@ -100,6 +100,20 @@ class UserResponse extends Model
         return implode('; ', $recommendations);
     }
 
+   public function getIvaTestRecommendation($facilitySuggestions = [])
+    {
+        $baseRecommendation = $this->recommendations;
+        
+        if (!empty($facilitySuggestions)) {
+            $facilityNames = collect($facilitySuggestions)->pluck('name')->take(3)->implode(', ');
+            $locationRecommendation = "Fasilitas kesehatan terdekat yang dapat Anda kunjungi: {$facilityNames}.";
+            
+            return $baseRecommendation . ' ' . $locationRecommendation;
+        }
+        
+        return $baseRecommendation;
+    }
+
     public const RISK_LEVELS = [
         'Rendah' => 'Rendah',
         'Sedang-Tinggi' => 'Sedang-Tinggi'

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Models\FacilityIva;
 
 class ResponseApiController extends Controller
 {
@@ -21,7 +22,9 @@ class ResponseApiController extends Controller
                 'responses' => 'required|array|min:1',
                 'responses.*.question_id' => 'required|integer|exists:questions,id',
                 'responses.*.selected_option' => 'required|integer|min:0',
-                'session_id' => 'nullable|string'
+                'session_id' => 'nullable|string',
+                'user_latitude' => 'nullable|numeric|between:-90,90',
+                'user_longitude' => 'nullable|numeric|between:-180,180'
             ]);
 
             if ($validator->fails()) {
@@ -46,6 +49,12 @@ class ResponseApiController extends Controller
                 ->first();
 
             if ($existingResponse) {
+                // Jika sudah ada response hari ini, tetap berikan saran fasilitas jika risk level tinggi
+                $facilitySuggestions = [];
+                if ($existingResponse->risk_level === 'Sedang-Tinggi') {
+                    $facilitySuggestions = $this->getFacilitySuggestions($user, $request);
+                }
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda sudah mengisi tes hari ini. Silakan coba lagi besok.',
@@ -55,7 +64,8 @@ class ResponseApiController extends Controller
                             'total_score' => $existingResponse->total_score,
                             'risk_level' => $existingResponse->risk_level,
                             'completed_at' => $existingResponse->completed_at
-                        ]
+                        ],
+                        'facility_suggestions' => $facilitySuggestions
                     ]
                 ], 409);
             }
@@ -107,6 +117,12 @@ class ResponseApiController extends Controller
                 'completed_at' => Carbon::now()
             ]);
 
+            // Ambil saran fasilitas jika risk level Sedang-Tinggi
+            $facilitySuggestions = [];
+            if ($riskLevel === 'Sedang-Tinggi') {
+                $facilitySuggestions = $this->getFacilitySuggestions($user, $request);
+            }
+
             DB::commit();
 
             return response()->json([
@@ -130,7 +146,8 @@ class ResponseApiController extends Controller
                         'recommendations' => $recommendations,
                         'completed_at' => $userResponse->completed_at
                     ],
-                    'responses' => $validatedResponses
+                    'responses' => $validatedResponses,
+                    'facility_suggestions' => $facilitySuggestions
                 ]
             ], 201);
 
@@ -192,61 +209,77 @@ class ResponseApiController extends Controller
         }
     }
 
-    public function getResponseDetail($id)
+    private function getFacilitySuggestions($user, $request): array
     {
+        $suggestions = [];
+        $maxSuggestions = 3;
+
         try {
-            $user = Auth::user();
+            // Prioritas 1: Berdasarkan koordinat user (jika ada)
+            if ($request->has('user_latitude') && $request->has('user_longitude')) {
+                $nearbyFacilities = FacilityIva::active()
+                    ->nearBy($request->user_latitude, $request->user_longitude, 25)
+                    ->limit($maxSuggestions)
+                    ->get();
+                
+                if ($nearbyFacilities->isNotEmpty()) {
+                    return [
+                        'message' => 'Fasilitas IVA terdekat dari lokasi Anda:',
+                        'facilities' => $nearbyFacilities->toArray(),
+                        'total_suggestions' => $nearbyFacilities->count(),
+                        'note' => 'Silakan hubungi fasilitas untuk membuat janji temu.'
+                    ];
+                }
+            }
+
+            // Prioritas 2: Berdasarkan alamat user
+            if ($user->alamat) {
+                $facilitiesByUserLocation = FacilityIva::active()
+                    ->where(function($query) use ($user) {
+                        // Cari berdasarkan kata kunci dalam alamat
+                        $alamatWords = explode(' ', $user->alamat);
+                        foreach ($alamatWords as $word) {
+                            if (strlen($word) > 3) { // hanya kata yang lebih dari 3 huruf
+                                $query->orWhere('location', 'LIKE', '%' . $word . '%');
+                                $query->orWhere('address', 'LIKE', '%' . $word . '%');
+                            }
+                        }
+                    })
+                    ->limit($maxSuggestions)
+                    ->get();
+                
+                if ($facilitiesByUserLocation->isNotEmpty()) {
+                    return [
+                        'message' => 'Fasilitas IVA di sekitar alamat Anda:',
+                        'facilities' => $facilitiesByUserLocation->toArray(),
+                        'total_suggestions' => $facilitiesByUserLocation->count(),
+                        'note' => 'Silakan hubungi fasilitas untuk membuat janji temu.'
+                    ];
+                }
+            }
+
+            // Prioritas 3: Fasilitas dengan pelatihan terbaru (fallback)
+            $facilitiesWithTraining = FacilityIva::active()
+                ->whereNotNull('iva_training_years')
+                ->orderBy('location')
+                ->limit($maxSuggestions)
+                ->get();
             
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User tidak terautentikasi'
-                ], 401);
-            }
-
-            $response = UserResponse::with('user')
-                ->where('id', $id)
-                ->where('user_id', $user->id)
-                ->first();
-
-            if (!$response) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data response tidak ditemukan'
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Detail response berhasil diambil',
-                'data' => [
-                    'response_id' => $response->id,
-                    'user_info' => [
-                        'id' => $response->user->id,
-                        'name' => $response->user->name,
-                        'email' => $response->user->email,
-                        'phone' => $response->user->phone,
-                        'alamat' => $response->user->alamat,
-                        'umur' => $response->user->umur,
-                        'fasilitas_kesehatan' => $response->user->fasilitas_kesehatan
-                    ],
-                    'test_result' => [
-                        'total_questions' => count($response->responses),
-                        'total_score' => $response->total_score,
-                        'risk_level' => $response->risk_level,
-                        'recommendations' => $response->recommendations,
-                        'completed_at' => $response->completed_at
-                    ],
-                    'responses' => $response->responses
-                ]
-            ]);
+            return [
+                'message' => 'Fasilitas IVA yang tersedia:',
+                'facilities' => $facilitiesWithTraining->toArray(),
+                'total_suggestions' => $facilitiesWithTraining->count(),
+                'note' => 'Silakan hubungi fasilitas untuk membuat janji temu.'
+            ];
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil detail response',
+            return [
+                'message' => 'Silakan konsultasi ke fasilitas kesehatan terdekat.',
+                'facilities' => [],
+                'total_suggestions' => 0,
+                'note' => 'Gagal mengambil daftar fasilitas kesehatan.',
                 'error' => $e->getMessage()
-            ], 500);
+            ];
         }
     }
 }
