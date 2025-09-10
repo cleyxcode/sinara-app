@@ -29,8 +29,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->globalSearch()
-            
-            ->font('Inter') 
+           ->passwordReset()
+        ->emailVerification()
+        ->profile()
+            ->font('Inter')
             ->brandName('PETUGAS SINARA')
             ->colors([
                 'primary' => Color::Amber,
@@ -46,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Widgets\UserAppStatsWidget::class,
                 \App\Filament\Widgets\ScreeningTrendChartWidget::class,
                   \App\Filament\Widgets\RiskDistributionChartWidget::class,
-               
+
             ])
             ->plugins([
     \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
