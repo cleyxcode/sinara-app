@@ -14,6 +14,7 @@ return [
         'cluster' => null,
     ],
 
+
     'tenant_model' => null,
 
     'auth_provider_model' => [
@@ -32,24 +33,35 @@ return [
         'name' => 'panel_user',
     ],
 
+    'forbidden' => 'Kamu tidak punya izin akses',
+
+     'section' => 'Entitas',
+    'resources' => 'Sumber Daya',
+    'widgets' => 'Widget',
+    'pages' => 'Halaman',
+    'custom' => 'Izin Kustom',
+
     'permission_prefixes' => [
         'resource' => [
-            'view',
-            'view_any',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'replicate',
-            'reorder',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
+          'view' => 'Lihat',
+        'view_any' => 'Lihat Apa Saja',
+        'create' => 'Buat',
+        'update' => 'Perbarui',
+        'delete' => 'Hapus',
+        'delete_any' => 'Hapus Apa Saja',
+        'force_delete' => 'Paksa Hapus',
+        'force_delete_any' => 'Paksa Hapus Apa Saja',
+        'restore' => 'Pulihkan',
+        'replicate' => 'Replikasi',
+        'reorder' => 'Susun Ulang',
+        'restore_any' => 'Pulihkan Apa Saja',
         ],
 
-        'page' => 'page',
-        'widget' => 'widget',
+        'section' => 'Entitas',
+    'resources' => 'Sumber Daya',
+    'widgets' => 'Widget',
+    'pages' => 'Halaman',
+    'custom' => 'Izin Kustom',
     ],
 
     'entities' => [
