@@ -24,7 +24,7 @@ class QuestionResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
     protected static ?string $navigationLabel = 'Kelola Pertanyaan';
     protected static ?string $modelLabel = 'Pertanyaan Skrining';
-    
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -128,7 +128,7 @@ class QuestionResource extends Resource
                 Tables\Filters\SelectFilter::make('category')
                     ->label('Kategori')
                     ->options(Question::CATEGORIES),
-                
+
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Status')
                     ->boolean()
@@ -158,4 +158,10 @@ class QuestionResource extends Resource
             'edit' => Pages\EditQuestion::route('/{record}/edit'),
         ];
     }
+     public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+
 }

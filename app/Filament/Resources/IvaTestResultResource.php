@@ -26,7 +26,7 @@ class IvaTestResultResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Hasil Tes IVA';
 
-    
+
 
     protected static ?int $navigationSort = 1;
 
@@ -199,11 +199,11 @@ class IvaTestResultResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
-                    ->visible(fn (IvaTestResult $record): bool => 
+                    ->visible(fn (IvaTestResult $record): bool =>
                         $record->created_at->diffInHours(now()) <= 24
                     ),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn (IvaTestResult $record): bool => 
+                    ->visible(fn (IvaTestResult $record): bool =>
                         $record->created_at->diffInHours(now()) <= 1
                     ),
             ])
@@ -303,13 +303,13 @@ class IvaTestResultResource extends Resource
     {
         $positiveCount = static::getModel()::where('result', 'positif')->count();
         $totalCount = static::getModel()::count();
-        
+
         if ($totalCount === 0) {
             return 'gray';
         }
-        
+
         $positivePercentage = ($positiveCount / $totalCount) * 100;
-        
+
         if ($positivePercentage > 20) {
             return 'danger';
         } elseif ($positivePercentage > 10) {
@@ -318,4 +318,5 @@ class IvaTestResultResource extends Resource
             return 'success';
         }
     }
+
 }
