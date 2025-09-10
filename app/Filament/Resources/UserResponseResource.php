@@ -131,7 +131,7 @@ class UserResponseResource extends Resource
                     ->label('Waktu Selesai')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->description(fn (UserResponse $record): string => 
+                    ->description(fn (UserResponse $record): string =>
                         $record->completed_at->diffForHumans()
                     ),
 
@@ -249,7 +249,7 @@ class UserResponseResource extends Resource
                     ->modalSubmitActionLabel('Ya, Hapus')
                     ->modalCancelActionLabel('Batal')
                     ->successNotificationTitle('Data berhasil dihapus')
-                   
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -264,7 +264,7 @@ class UserResponseResource extends Resource
                         ->modalCancelActionLabel('Batal')
                         ->successNotificationTitle('Data terpilih berhasil dihapus')
                         ->deselectRecordsAfterCompletion(),
-                        
+
                     ExportBulkAction::make()
                         ->exports([
                             // Export Summary - Ringkasan data
@@ -288,7 +288,7 @@ class UserResponseResource extends Resource
                                     Column::make('session_id')->heading('Session ID'),
                                 ]),
 
-                            
+
                             ExcelExport::make('detailed')
                                 ->withFilename(fn () => 'detail-skrining-' . now()->format('Y-m-d-H-i'))
                                 ->withColumns([
@@ -378,7 +378,7 @@ class UserResponseResource extends Resource
                                     ->formatStateUsing(fn ($state) => $state->format('d/m/Y H:i')),
                             ]),
 
-                       
+
                         ExcelExport::make('detailed_report_word')
                             ->withFilename(fn () => 'laporan-detail-skrining-' . now()->format('Y-m-d-H-i'))
                             ->withWriterType(\Maatwebsite\Excel\Excel::XLSX)
@@ -402,7 +402,7 @@ class UserResponseResource extends Resource
                                         if (empty($state)) return 'Tidak ada jawaban';
                                         $summary = [];
                                         $categories = [];
-                                        
+
                                         foreach ($state as $response) {
                                             $category = $response['category'] ?? 'Lainnya';
                                             if (!isset($categories[$category])) {
@@ -411,17 +411,17 @@ class UserResponseResource extends Resource
                                             $categories[$category]['count']++;
                                             $categories[$category]['score'] += $response['score'] ?? 0;
                                         }
-                                        
+
                                         foreach ($categories as $category => $data) {
                                             $summary[] = "{$category}: {$data['count']} pertanyaan, skor {$data['score']}";
                                         }
-                                        
+
                                         return implode('; ', $summary);
                                     }),
                                 Column::make('recommendations')->heading('Rekomendasi'),
                             ]),
 
-                  
+
                         ExcelExport::make('statistics')
                             ->withFilename(fn () => 'statistik-skrining-' . now()->format('Y-m-d-H-i'))
                             ->modifyQueryUsing(function ($query) {
@@ -591,7 +591,7 @@ class UserResponseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            
+
         ];
     }
 
@@ -605,7 +605,7 @@ class UserResponseResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false; 
+        return false;
     }
 
     public static function canEdit($record): bool

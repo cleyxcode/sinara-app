@@ -1,7 +1,5 @@
 <?php
 
-// File: app/Filament/Resources/UserResponseResource/Pages/ListUserResponses.php
-
 namespace App\Filament\Resources\UserResponseResource\Pages;
 
 use App\Filament\Resources\UserResponseResource;
@@ -17,7 +15,7 @@ class ListUserResponses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            
+
         ];
     }
 
@@ -26,21 +24,16 @@ class ListUserResponses extends ListRecords
         return [
             'all' => Tab::make('Semua')
                 ->badge($this->getModel()::count()),
-            
+
             'rendah' => Tab::make('Risiko Rendah')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('risk_level', 'Rendah'))
                 ->badge($this->getModel()::where('risk_level', 'Rendah')->count())
                 ->badgeColor('success'),
-            
-            'sedang' => Tab::make('Risiko Sedang')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('risk_level', 'Sedang'))
-                ->badge($this->getModel()::where('risk_level', 'Sedang')->count())
+
+            'sedang_tinggi' => Tab::make('Risiko Sedang-Tinggi')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('risk_level', 'Sedang-Tinggi'))
+                ->badge($this->getModel()::where('risk_level', 'Sedang-Tinggi')->count())
                 ->badgeColor('warning'),
-            
-            'tinggi' => Tab::make('Risiko Tinggi')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('risk_level', 'Tinggi'))
-                ->badge($this->getModel()::where('risk_level', 'Tinggi')->count())
-                ->badgeColor('danger'),
         ];
     }
 }

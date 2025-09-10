@@ -21,11 +21,11 @@ class UserAppResource extends Resource
     protected static ?string $model = UserApp::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    
+
     protected static ?string $navigationLabel = 'Pengguna Terdaftar';
-    
+
     protected static ?string $modelLabel = 'Pengguna';
-    
+
     protected static ?string $pluralModelLabel = 'Pengguna Terdaftar';
 
     public static function table(Table $table): Table
@@ -35,26 +35,26 @@ class UserAppResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
                     ->copyable()
                     ->copyMessage('Email disalin!')
                     ->copyMessageDuration(1500),
-                
+
                 Tables\Columns\TextColumn::make('phone')
                     ->label('No. Telepon')
                     ->searchable()
                     ->copyable()
                     ->copyMessage('Nomor telepon disalin!')
                     ->copyMessageDuration(1500),
-                
+
                 Tables\Columns\TextColumn::make('alamat')
                     ->label('Wilayah')
                     ->limit(30)
@@ -65,7 +65,7 @@ class UserAppResource extends Resource
                         }
                         return $state;
                     }),
-                
+
                 Tables\Columns\TextColumn::make('fasilitas_kesehatan')
                     ->label('Fasilitas Kesehatan')
                     ->searchable()
@@ -79,7 +79,7 @@ class UserAppResource extends Resource
                         }
                         return $state;
                     }),
-                    
+
                 Tables\Columns\TextColumn::make('umur')
                     ->label('Umur')
                     ->suffix(' thn')
@@ -99,7 +99,7 @@ class UserAppResource extends Resource
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                    
+
             ])
             ->filters([
                 SelectFilter::make('fasilitas_kesehatan')
@@ -217,7 +217,7 @@ class UserAppResource extends Resource
                     ->modalSubmitActionLabel('Ya, Hapus')
                     ->modalCancelActionLabel('Batal')
                     ->successNotificationTitle('Pengguna berhasil dihapus'),
-                   
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -232,7 +232,7 @@ class UserAppResource extends Resource
                         ->modalCancelActionLabel('Batal')
                         ->successNotificationTitle('Pengguna terpilih berhasil dihapus')
                         ->deselectRecordsAfterCompletion(),
-                        
+
 
                     Tables\Actions\BulkAction::make('export_selected')
                         ->label('Export Terpilih')
@@ -315,31 +315,31 @@ class UserAppResource extends Resource
                                     ->size('lg')
                                     ->weight('bold')
                                     ->color('primary'),
-                                
+
                                 Infolists\Components\TextEntry::make('email')
                                     ->label('Alamat Email')
                                     ->copyable()
                                     ->copyMessage('Email disalin!')
                                     ->icon('heroicon-m-envelope'),
-                                
+
                                 Infolists\Components\TextEntry::make('phone')
                                     ->label('Nomor Telepon')
                                     ->copyable()
                                     ->copyMessage('Nomor telepon disalin!')
                                     ->icon('heroicon-m-phone'),
-                                
+
                                 Infolists\Components\TextEntry::make('umur')
                                     ->label('Umur')
                                     ->suffix(' tahun')
                                     ->badge()
                                     ->color('info'),
                             ]),
-                        
+
                         Infolists\Components\TextEntry::make('alamat')
                             ->label('Alamat Lengkap')
                             ->columnSpanFull()
                             ->icon('heroicon-m-map-pin'),
-                            
+
                         Infolists\Components\TextEntry::make('fasilitas_kesehatan')
                             ->label('Fasilitas Kesehatan')
                             ->columnSpanFull()
@@ -348,7 +348,7 @@ class UserAppResource extends Resource
                             ->color('success')
                             ->icon('heroicon-m-building-office-2'),
                     ]),
-                
+
                 Infolists\Components\Section::make('Status & Informasi Akun')
                     ->schema([
                         Infolists\Components\Grid::make(3)
@@ -360,13 +360,13 @@ class UserAppResource extends Resource
                                     ->falseIcon('heroicon-o-x-mark')
                                     ->trueColor('success')
                                     ->falseColor('danger'),
-                                
+
                                 Infolists\Components\TextEntry::make('created_at')
                                     ->label('Tanggal Registrasi')
                                     ->dateTime('d F Y, H:i:s')
                                     ->badge()
                                     ->color('success'),
-                                
+
                                 Infolists\Components\TextEntry::make('email_verified_at')
                                     ->label('Email Diverifikasi')
                                     ->dateTime('d F Y, H:i:s')
@@ -384,7 +384,7 @@ class UserAppResource extends Resource
                             ->getStateUsing(fn (UserApp $record): int => $record->responses()->count())
                             ->badge()
                             ->color('info'),
-                        
+
                         Infolists\Components\TextEntry::make('last_screening')
                             ->label('Skrining Terakhir')
                             ->getStateUsing(function (UserApp $record): string {
@@ -442,4 +442,5 @@ class UserAppResource extends Resource
     {
         return true;
     }
+
 }

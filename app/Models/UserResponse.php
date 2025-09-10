@@ -73,7 +73,7 @@ class UserResponse extends Model
 
     public static function determineRiskLevel($responses)
     {
-        
+
         $hasRiskyAnswer = collect($responses)->contains(function ($response) {
             return $response['score'] == 1;
         });
@@ -85,7 +85,7 @@ class UserResponse extends Model
     {
         $recommendations = [];
 
-       
+
         $recommendations[] = 'Lakukan deteksi dini kanker serviks melalui IVA di Puskesmas atau Pap Smear di Fasilitas Kesehatan lainnya untuk hasil yang lebih akurat.';
 
         if ($riskLevel === 'Rendah') {
@@ -103,14 +103,14 @@ class UserResponse extends Model
    public function getIvaTestRecommendation($facilitySuggestions = [])
     {
         $baseRecommendation = $this->recommendations;
-        
+
         if (!empty($facilitySuggestions)) {
             $facilityNames = collect($facilitySuggestions)->pluck('name')->take(3)->implode(', ');
             $locationRecommendation = "Fasilitas kesehatan terdekat yang dapat Anda kunjungi: {$facilityNames}.";
-            
+
             return $baseRecommendation . ' ' . $locationRecommendation;
         }
-        
+
         return $baseRecommendation;
     }
 
