@@ -33,13 +33,9 @@ return [
         'name' => 'panel_user',
     ],
 
+
     'forbidden' => 'Kamu tidak punya izin akses',
 
-     'section' => 'Entitas',
-    'resources' => 'Sumber Daya',
-    'widgets' => 'Widget',
-    'pages' => 'Halaman',
-    'custom' => 'Izin Kustom',
 
     'permission_prefixes' => [
         'resource' => [
