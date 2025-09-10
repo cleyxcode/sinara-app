@@ -30,7 +30,7 @@ class FacilityIvaResource extends Resource
     protected static ?string $navigationLabel = 'Fasilitas IVA';
     protected static ?string $modelLabel = 'Fasilitas IVA';
     protected static ?string $pluralModelLabel = 'Fasilitas IVA';
-    
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
@@ -237,7 +237,7 @@ class FacilityIvaResource extends Resource
                     ->options(FacilityIva::AVAILABLE_LOCATIONS)
                     ->searchable()
                     ->multiple(),
-                
+
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Status')
                     ->boolean()
@@ -325,5 +325,9 @@ class FacilityIvaResource extends Resource
             'Lokasi' => $record->location,
             'Status' => $record->is_active ? 'Aktif' : 'Tidak Aktif',
         ];
+    }
+     public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }
