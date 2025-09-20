@@ -9,52 +9,55 @@ use Illuminate\Http\JsonResponse;
 
 class ArticleApiController extends Controller
 {
-    public function index(Request $request): JsonResponse
-    {
-        try {
-            $perPage = $request->get('per_page', 10);
-            $page = $request->get('page', 1);
-            
-            $articles = Article::published()
-                ->select('id', 'title', 'content', 'image', 'created_at', 'updated_at')
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage);
+   /**
+ * Get all active facilities
+ */
+public function index(Request $request): JsonResponse
+{
+    try {
+        $query = FacilityIva::active();
 
-            $articles->getCollection()->transform(function ($article) {
-                return [
-                    'id' => $article->id,
-                    'title' => $article->title,
-                    'content' => $article->content,
-                    'excerpt' => $this->generateExcerpt($article->content),
-                    'image' => $article->image,
-                    'image_url' => $article->image_url,
-                    'created_at' => $article->created_at,
-                    'updated_at' => $article->updated_at,
-                ];
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Articles retrieved successfully',
-                'data' => $articles->items(),
-                'meta' => [
-                    'current_page' => $articles->currentPage(),
-                    'total' => $articles->total(),
-                    'per_page' => $articles->perPage(),
-                    'last_page' => $articles->lastPage(),
-                    'from' => $articles->firstItem(),
-                    'to' => $articles->lastItem(),
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve articles',
-                'error' => $e->getMessage()
-            ], 500);
+        // Filter by location HANYA jika location parameter benar-benar dikirim dan tidak kosong
+        $location = $request->get('location');
+        if (!empty($location) && $location !== 'all' && $location !== null) {
+            $query->byLocation($location);
         }
+
+        // Pagination
+        $perPage = (int) $request->get('per_page', 15);
+        
+        // Pastikan per_page tidak terlalu kecil
+        if ($perPage < 1) $perPage = 15;
+        if ($perPage > 100) $perPage = 100;
+
+        $facilities = $query->orderBy('location')
+                           ->orderBy('name')
+                           ->paginate($perPage);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Fasilitas IVA berhasil diambil',
+            'data' => $facilities->items(),
+            'pagination' => [
+                'current_page' => $facilities->currentPage(),
+                'total' => $facilities->total(),
+                'per_page' => $facilities->perPage(),
+                'last_page' => $facilities->lastPage(),
+                'has_more' => $facilities->hasMorePages()
+            ],
+            'filter_applied' => [
+                'location' => $location ?? null,
+                'is_filtered' => !empty($location) && $location !== 'all'
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal mengambil data fasilitas IVA',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function show($id): JsonResponse
     {

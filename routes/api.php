@@ -49,19 +49,47 @@ Route::prefix('articles')->group(function () {
     Route::get('/{id}', [ArticleApiController::class, 'show']);
 });
 
-// Facility IVA Routes
+// Facility IVA Routes - LENGKAP DENGAN SEMUA ENDPOINT
 Route::prefix('facilities')->group(function () {
-    // Public routes - tidak perlu auth karena untuk informasi umum
+    
+    // ===== ENDPOINT UNTUK SEMUA DATA =====
+    
+    // Endpoint baru: Semua fasilitas tanpa pagination
+    Route::get('/all', [FacilityIvaApiController::class, 'getAllFacilities']);
+    
+    // Endpoint baru: Semua lokasi dengan detail fasilitas  
+    Route::get('/locations/all', [FacilityIvaApiController::class, 'getAllLocationsWithDetails']);
+    
+    // Endpoint baru: Daftar lokasi dengan jumlah fasilitas
+    Route::get('/locations/list', [FacilityIvaApiController::class, 'getLocationsList']);
+    
+    // ===== ENDPOINT ORIGINAL =====
+    
+    // Endpoint utama dengan pagination (mendukung per_page besar dan parameter all=true)
     Route::get('/', [FacilityIvaApiController::class, 'index']);
+    
+    // Fasilitas terdekat berdasarkan koordinat
     Route::get('/nearby', [FacilityIvaApiController::class, 'getNearby']);
+    
+    // Daftar lokasi sederhana (original)
     Route::get('/locations', [FacilityIvaApiController::class, 'getLocations']);
+    
+    // Pencarian fasilitas
     Route::get('/search', [FacilityIvaApiController::class, 'search']);
+    
+    // Statistik fasilitas
     Route::get('/stats', [FacilityIvaApiController::class, 'getStats']);
+    
+    // Fasilitas berdasarkan lokasi tertentu
     Route::get('/location/{location}', [FacilityIvaApiController::class, 'getByLocation']);
+    
+    // Detail fasilitas berdasarkan ID
     Route::get('/{id}', [FacilityIvaApiController::class, 'show']);
     
-    // Route khusus untuk saran setelah skrining
+    // ===== ENDPOINT YANG MEMERLUKAN AUTH =====
+    
     Route::middleware('auth:sanctum')->group(function () {
+        // Saran fasilitas setelah skrining
         Route::get('/suggestions/after-screening', [FacilityIvaApiController::class, 'getSuggestionAfterScreening']);
     });
 });

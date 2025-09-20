@@ -23,8 +23,27 @@ class FacilityIvaApiController extends Controller
                 $query->byLocation($request->location);
             }
 
-            // Pagination
-            $perPage = $request->get('per_page', 15);
+            // Jika request ingin semua data tanpa pagination
+            if ($request->get('all') === 'true' || $request->get('per_page') === 'all') {
+                $facilities = $query->orderBy('location')
+                                   ->orderBy('name')
+                                   ->get();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Semua fasilitas IVA berhasil diambil',
+                    'data' => $facilities,
+                    'total' => $facilities->count()
+                ]);
+            }
+
+            // Pagination dengan dukungan per_page yang besar
+            $perPage = (int) $request->get('per_page', 15);
+            
+            // Validasi per_page - izinkan sampai 1000
+            if ($perPage < 1) $perPage = 15;
+            if ($perPage > 1000) $perPage = 1000;
+
             $facilities = $query->orderBy('location')
                                ->orderBy('name')
                                ->paginate($perPage);
@@ -45,6 +64,92 @@ class FacilityIvaApiController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengambil data fasilitas IVA',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all facilities without pagination (endpoint khusus)
+     */
+    public function getAllFacilities(Request $request): JsonResponse
+    {
+        try {
+            $query = FacilityIva::active();
+
+            // Filter by location if provided
+            if ($request->has('location') && !empty($request->location)) {
+                $query->byLocation($request->location);
+            }
+
+            $facilities = $query->orderBy('location')
+                               ->orderBy('name')
+                               ->get();
+
+            // Group by location untuk kemudahan di frontend
+            $groupedFacilities = $facilities->groupBy('location');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Semua fasilitas IVA berhasil diambil',
+                'data' => $facilities,
+                'grouped_data' => $groupedFacilities,
+                'summary' => [
+                    'total_facilities' => $facilities->count(),
+                    'total_locations' => $groupedFacilities->keys()->count(),
+                    'locations' => $groupedFacilities->keys()->values()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil semua data fasilitas IVA',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all locations with facility details
+     */
+    public function getAllLocationsWithDetails(): JsonResponse
+    {
+        try {
+            // Ambil semua lokasi dengan jumlah fasilitas
+            $locationStats = FacilityIva::active()
+                ->selectRaw('location, COUNT(*) as facility_count')
+                ->groupBy('location')
+                ->orderBy('location')
+                ->get();
+
+            // Ambil detail fasilitas per lokasi
+            $locationsWithFacilities = [];
+            foreach ($locationStats as $stat) {
+                $facilities = FacilityIva::active()
+                    ->where('location', $stat->location)
+                    ->orderBy('name')
+                    ->get();
+
+                $locationsWithFacilities[] = [
+                    'location' => $stat->location,
+                    'facility_count' => $stat->facility_count,
+                    'facilities' => $facilities
+                ];
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Semua lokasi dengan detail fasilitas berhasil diambil',
+                'data' => [
+                    'total_locations' => count($locationsWithFacilities),
+                    'total_facilities' => FacilityIva::active()->count(),
+                    'locations' => $locationsWithFacilities
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil data lokasi dengan detail',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -124,7 +229,7 @@ class FacilityIvaApiController extends Controller
     }
 
     /**
-     * Get available locations
+     * Get available locations (original)
      */
     public function getLocations(): JsonResponse
     {
@@ -141,6 +246,41 @@ class FacilityIvaApiController extends Controller
                 'data' => [
                     'locations' => $locations,
                     'total' => $locations->count()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengambil daftar lokasi',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get locations list with facility count
+     */
+    public function getLocationsList(): JsonResponse
+    {
+        try {
+            $locations = FacilityIva::active()
+                ->selectRaw('location, COUNT(*) as facility_count')
+                ->groupBy('location')
+                ->orderBy('location')
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'location' => $item->location,
+                        'facility_count' => $item->facility_count
+                    ];
+                });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Daftar lokasi berhasil diambil',
+                'data' => [
+                    'total_locations' => $locations->count(),
+                    'locations' => $locations
                 ]
             ]);
         } catch (\Exception $e) {
